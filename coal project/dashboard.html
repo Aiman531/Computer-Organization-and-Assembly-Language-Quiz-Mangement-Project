@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Quiz Engine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-microchip"></i> Quiz Engine
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="records.html">Records</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="dashboard-section py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="glass-card p-4">
+                        <h2 class="gradient-text mb-3">Analytics Dashboard</h2>
+                        <p class="text-white-50">Quiz performance statistics and insights</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3 mb-4">
+                    <div class="glass-card stat-card p-4 text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h3 class="text-white mb-1" id="totalPlayers">0</h3>
+                        <p class="text-white-50 mb-0">Total Players</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="glass-card stat-card p-4 text-center">
+                        <i class="fas fa-trophy fa-3x mb-3 text-warning"></i>
+                        <h3 class="text-white mb-1" id="highestScore">0</h3>
+                        <p class="text-white-50 mb-0">Highest Score</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="glass-card stat-card p-4 text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                        <h3 class="text-white mb-1" id="averageScore">0</h3>
+                        <p class="text-white-50 mb-0">Average Score</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="glass-card stat-card p-4 text-center">
+                        <i class="fas fa-star fa-3x mb-3 text-info"></i>
+                        <h3 class="text-white mb-1" id="popularCategory">-</h3>
+                        <p class="text-white-50 mb-0">Popular Category</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-4">Score Distribution</h5>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-4">Category Performance</h5>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-4">Recent Activity</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Category</th>
+                                        <th>Score</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentActivityBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-white-50 py-4">
+                                            <p>No data available. Please upload RECORD.TXT on the Records page.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</body>
+</html>

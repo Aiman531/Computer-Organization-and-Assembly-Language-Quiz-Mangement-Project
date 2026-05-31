@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Assembly Quiz System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dark-theme">
+    <div class="animated-bg"></div>
+    
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    </a>
+                    <h2 class="m-0">
+                        <i class="fas fa-chart-line me-2 gradient-text"></i>
+                        Analytics Dashboard
+                    </h2>
+                    <div></div>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card text-center p-3">
+                            <i class="fas fa-users fa-3x mb-2 text-primary"></i>
+                            <h3 class="mb-0">{{ stats.total_players }}</h3>
+                            <small class="text-muted">Total Players</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card text-center p-3">
+                            <i class="fas fa-trophy fa-3x mb-2 text-warning"></i>
+                            <h3 class="mb-0">{{ stats.highest_score }}</h3>
+                            <small class="text-muted">Highest Score</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card text-center p-3">
+                            <i class="fas fa-chart-simple fa-3x mb-2 text-info"></i>
+                            <h3 class="mb-0">{{ stats.average_score }}</h3>
+                            <small class="text-muted">Average Score</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card text-center p-3">
+                            <i class="fas fa-tag fa-3x mb-2 text-success"></i>
+                            <h6 class="mb-0 text-truncate">{{ stats.most_popular_category }}</h6>
+                            <small class="text-muted">Popular Category</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Row -->
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="glass-card p-4">
+                            <h4 class="mb-4">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Score Distribution
+                            </h4>
+                            <canvas id="barChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="glass-card p-4">
+                            <h4 class="mb-4">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Category Popularity
+                            </h4>
+                            <canvas id="pieChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Performers -->
+                <div class="glass-card mt-4 p-4">
+                    <h4 class="mb-4">
+                        <i class="fas fa-crown me-2 text-warning"></i>
+                        Top Performers
+                    </h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Username</th>
+                                    <th>Category</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPerformers">
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fetch data for charts
+        async function loadChartData() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                // Prepare data for charts
+                const categoryStats = data.category_stats;
+                const categories = Object.keys(categoryStats);
+                const counts = Object.values(categoryStats);
+                
+                // Create Bar Chart
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Score 0', 'Score 1', 'Score 2'],
+                        datasets: [{
+                            label: 'Number of Players',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1'],
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#fff' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#fff' },
+                                grid: { color: '#333' }
+                            },
+                            x: {
+                                ticks: { color: '#fff' },
+                                grid: { color: '#333' }
+                            }
+                        }
+                    }
+                });
+                
+                // Create Pie Chart
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#fff' }
+                            }
+                        }
+                    }
+                });
+                
+                // Update score distribution
+                const recordsResponse = await fetch('/api/records');
+                const records = await recordsResponse.json();
+                
+                const scoreDistribution = [0, 0, 0];
+                records.forEach(record => {
+                    if (record.score >= 0 && record.score <= 2) {
+                        scoreDistribution[record.score]++;
+                    }
+                });
+                
+                barChart.data.datasets[0].data = scoreDistribution;
+                barChart.update();
+                
+                // Update top performers
+                const topPerformers = [...records]
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 5);
+                
+                const topPerformersBody = document.getElementById('topPerformers');
+                topPerformersBody.innerHTML = topPerformers.map((performer, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${performer.username}</td>
+                        <td>${performer.category}</td>
+                        <td>${performer.score}/2</td>
+                    </tr>
+                `).join('');
+                
+                let barChart;
+                
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+            }
+        }
+        
+        loadChartData();
+    </script>
+</body>
+</html>

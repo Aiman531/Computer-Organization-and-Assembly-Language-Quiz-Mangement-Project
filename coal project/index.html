@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Engine - Computer Organization & Assembly Language</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-microchip"></i> Quiz Engine
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="records.html">Records</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="hero-content glass-card">
+                        <h1 class="display-4 fw-bold mb-4">
+                            <span class="gradient-text">Quiz Engine</span>
+                        </h1>
+                        <p class="lead mb-4 text-white">
+                            Computer Organization & Assembly Language Project
+                        </p>
+                        <p class="text-white-50 mb-5">
+                            Built with 8086 Assembly Language using TASM
+                        </p>
+                        
+                        <div class="d-grid gap-3 col-lg-8 mx-auto">
+                            <a href="#" class="btn btn-primary btn-lg glass-btn" onclick="alert('Please run the Assembly quiz engine (.EXE file) to start the quiz.')">
+                                <i class="fas fa-play"></i> Start Quiz
+                            </a>
+                            <a href="records.html" class="btn btn-outline-light btn-lg glass-btn">
+                                <i class="fas fa-list"></i> View Records
+                            </a>
+                            <a href="dashboard.html" class="btn btn-outline-light btn-lg glass-btn">
+                                <i class="fas fa-chart-bar"></i> Dashboard
+                            </a>
+                            <button class="btn btn-outline-light btn-lg glass-btn" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                                <i class="fas fa-info-circle"></i> About Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content glass-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white">About Project</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-white">
+                    <h6 class="gradient-text">Project Overview</h6>
+                    <p class="text-white-50">
+                        This project is a Quiz Engine developed as part of the Computer Organization and Assembly Language course.
+                        The quiz engine is entirely written in 8086 Assembly Language using TASM (Turbo Assembler).
+                    </p>
+                    
+                    <h6 class="gradient-text mt-4">Features</h6>
+                    <ul class="text-white-50">
+                        <li>Multiple choice quiz system</li>
+                        <li>Real-time score calculation</li>
+                        <li>Record generation (RECORD.TXT)</li>
+                        <li>Category-based questions</li>
+                        <li>User authentication</li>
+                    </ul>
+                    
+                    <h6 class="gradient-text mt-4">Technology Stack</h6>
+                    <ul class="text-white-50">
+                        <li><strong>Assembly Language:</strong> 8086 Architecture</li>
+                        <li><strong>Assembler:</strong> TASM (Turbo Assembler)</li>
+                        <li><strong>Frontend:</strong> HTML, CSS, JavaScript, Bootstrap 5</li>
+                        <li><strong>Visualization:</strong> Chart.js</li>
+                    </ul>
+                    
+                    <h6 class="gradient-text mt-4">How to Use</h6>
+                    <ol class="text-white-50">
+                        <li>Run the Assembly quiz engine (.EXE file)</li>
+                        <li>Complete the quiz</li>
+                        <li>The program generates RECORD.TXT</li>
+                        <li>Upload RECORD.TXT to the Records page</li>
+                        <li>View analytics on the Dashboard</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<!-- saved from url=(0108)file:///C:/Users/e%20touch%20computer/Downloads/COAL%20Project%20%E2%80%94%20Quiz%20Management%20System.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COAL Project — Quiz Management System</title>
+<link href="./COAL Project — Quiz Management System_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --neon-pink:   #FF2D78;
+    --neon-cyan:   #00F5FF;
+    --neon-yellow: #FFE600;
+    --neon-green:  #39FF14;
+    --neon-purple: #BF00FF;
+    --deep-bg:     #050510;
+    --card-bg:     rgba(255,255,255,0.04);
+    --glass:       rgba(255,255,255,0.07);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--deep-bg);
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    cursor: none;
+  }
+
+  /* ── Custom cursor ── */
+  #cursor {
+    position: fixed; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--neon-cyan); mix-blend-mode: screen;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .15s, height .15s, background .2s;
+    box-shadow: 0 0 12px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+  }
+  #cursor-ring {
+    position: fixed; width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px solid var(--neon-pink); pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%);
+    transition: transform .08s, width .2s, height .2s;
+    box-shadow: 0 0 8px var(--neon-pink);
+  }
+
+  /* ── Background canvas ── */
+  #bg-canvas { position: fixed; inset: 0; z-index: 0; }
+
+  /* ── Grid overlay ── */
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 6s ease-in-out infinite;
+  }
+  @keyframes gridPulse {
+    0%,100% { opacity: .6 } 50% { opacity: 1 }
+  }
+
+  /* ── Slide container ── */
+  #slides {
+    position: relative; z-index: 10;
+    width: 100vw; height: 100vh;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 72px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .05s;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  /* ── Nav ── */
+  #nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 14px; align-items: center; z-index: 100;
+    background: rgba(0,0,0,.5); border: 1px solid rgba(0,245,255,.2);
+    padding: 10px 24px; border-radius: 50px;
+    backdrop-filter: blur(20px);
+  }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.25); cursor: pointer;
+    transition: all .3s; border: none;
+  }
+  .nav-dot.active { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); width: 24px; border-radius: 4px; }
+  .nav-btn {
+    background: none; border: 1px solid rgba(0,245,255,.4); color: var(--neon-cyan);
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 14px;
+    transition: all .2s; display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 16px var(--neon-cyan); }
+
+  #slide-counter {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    color: rgba(255,255,255,.4); letter-spacing: 2px; min-width: 40px; text-align: center;
+  }
+
+  /* ── Keyboard hint ── */
+  #key-hint {
+    position: fixed; top: 20px; right: 28px; z-index: 100;
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    color: rgba(255,255,255,.25); letter-spacing: 1px;
+  }
+
+  /* ═══════════════════════════════════════
+     SLIDE 1 — TITLE
+  ═══════════════════════════════════════ */
+  .s1-eyebrow {
+    font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 5px;
+    color: var(--neon-cyan); text-transform: uppercase;
+    border: 1px solid rgba(0,245,255,.3); padding: 6px 20px; border-radius: 2px;
+    margin-bottom: 32px;
+    animation: fadeSlideUp .6s .2s both;
+  }
+  .s1-title {
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: clamp(36px, 5vw, 68px); line-height: 1.1;
+    text-align: center; margin-bottom: 16px;
+    animation: fadeSlideUp .6s .35s both;
+  }
+  .s1-title .line1 { color: #fff; display: block; }
+  .s1-title .line2 {
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan), var(--neon-yellow));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; display: block;
+  }
+  .s1-sub {
+    font-size: 18px; color: rgba(255,255,255,.55); letter-spacing: 2px;
+    margin-bottom: 52px; animation: fadeSlideUp .6s .5s both;
+    font-weight: 300;
+  }
+  .s1-tags {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 52px; animation: fadeSlideUp .6s .65s both;
+  }
+  .tag {
+    padding: 6px 18px; border-radius: 4px; font-size: 12px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    border: 1.5px solid; font-family: 'Share Tech Mono', monospace;
+  }
+  .tag-pink  { border-color: var(--neon-pink);   color: var(--neon-pink);   background: rgba(255,45,120,.08); }
+  .tag-cyan  { border-color: var(--neon-cyan);   color: var(--neon-cyan);   background: rgba(0,245,255,.08); }
+  .tag-yellow{ border-color: var(--neon-yellow); color: var(--neon-yellow); background: rgba(255,230,0,.08); }
+  .tag-green { border-color: var(--neon-green);  color: var(--neon-green);  background: rgba(57,255,20,.08); }
+  .tag-purple{ border-color: var(--neon-purple); color: var(--neon-purple); background: rgba(191,0,255,.08); }
+
+  .s1-team {
+    font-size: 13px; color: rgba(255,255,255,.35); letter-spacing: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    animation: fadeSlideUp .6s .8s both;
+  }
+
+  /* ═══════════════════════════════════════
+     SLIDE 2 — PROBLEM STATEMENT
+  ═══════════════════════════════════════ */
+  .slide-header {
+    width: 100%; margin-bottom: 36px;
+    animation: fadeSlideDown .5s .1s both;
+  }
+  .slide-header .slide-num {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    color: var(--neon-pink); letter-spacing: 4px; margin-bottom: 8px;
+  }
+  .slide-header h2 {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(24px, 3vw, 40px);
+    font-weight: 700; letter-spacing: 1px;
+    background: linear-gradient(90deg, #fff 60%, rgba(255,255,255,.3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .problem-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; width: 100%;
+  }
+  .prob-card {
+    background: var(--glass); border-radius: 12px; padding: 28px;
+    border-left: 3px solid var(--neon-pink);
+    backdrop-filter: blur(10px);
+    transform: translateX(-40px); opacity: 0;
+    animation: slideInLeft .5s both;
+    position: relative; overflow: hidden;
+  }
+  .prob-card::before {
+    content: ''; position: absolute; top: -50%; right: -50%;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,45,120,.06), transparent 70%);
+  }
+  .prob-card:nth-child(even) {
+    border-left-color: var(--neon-cyan);
+    animation-name: slideInRight;
+  }
+  .prob-card:nth-child(even)::before {
+    background: radial-gradient(circle, rgba(0,245,255,.06), transparent 70%);
+  }
+  .prob-card:nth-child(1) { animation-delay: .2s }
+  .prob-card:nth-child(2) { animation-delay: .3s }
+  .prob-card:nth-child(3) { animation-delay: .4s }
+  .prob-card:nth-child(4) { animation-delay: .5s }
+  .prob-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+  .prob-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; color: #fff; }
+  .prob-card p { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; font-weight: 300; }
+
+  /* ═══════════════════════════════════════
+     SLIDE 3 — OBJECTIVES
+  ═══════════════════════════════════════ */
+  .obj-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px; width: 100%;
+  }
+  .obj-card {
+    background: var(--glass); border-radius: 12px; padding: 24px 20px;
+    text-align: center; border: 1px solid rgba(255,255,255,.07);
+    backdrop-filter: blur(10px);
+    transform: translateY(40px); opacity: 0;
+    animation: fadeSlideUp .5s both;
+    transition: transform .3s, border-color .3s;
+    cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .obj-card:hover { transform: translateY(-6px) scale(1.02); }
+  .obj-card:nth-child(1) { animation-delay:.15s; border-top: 2px solid var(--neon-pink); }
+  .obj-card:nth-child(1):hover { border-color: var(--neon-pink); box-shadow: 0 0 30px rgba(255,45,120,.2); }
+  .obj-card:nth-child(2) { animation-delay:.25s; border-top: 2px solid var(--neon-cyan); }
+  .obj-card:nth-child(2):hover { border-color: var(--neon-cyan); box-shadow: 0 0 30px rgba(0,245,255,.2); }
+  .obj-card:nth-child(3) { animation-delay:.35s; border-top: 2px solid var(--neon-yellow); }
+  .obj-card:nth-child(3):hover { border-color: var(--neon-yellow); box-shadow: 0 0 30px rgba(255,230,0,.2); }
+  .obj-card:nth-child(4) { animation-delay:.45s; border-top: 2px solid var(--neon-green); }
+  .obj-card:nth-child(4):hover { border-color: var(--neon-green); box-shadow: 0 0 30px rgba(57,255,20,.2); }
+  .obj-card:nth-child(5) { animation-delay:.55s; border-top: 2px solid var(--neon-purple); }
+  .obj-card:nth-child(5):hover { border-color: var(--neon-purple); box-shadow: 0 0 30px rgba(191,0,255,.2); }
+  .obj-card:nth-child(6) { animation-delay:.65s; border-top: 2px solid var(--neon-pink); }
+  .obj-card:nth-child(6):hover { border-color: var(--neon-pink); box-shadow: 0 0 30px rgba(255,45,120,.2); }
+  .obj-num {
+    font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 900;
+    margin-bottom: 8px; line-height: 1;
+  }
+  .obj-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; letter-spacing: .5px; }
+  .obj-card p { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.5; font-weight: 300; }
+
+  /* ═══════════════════════════════════════
+     SLIDE 4 — ARCHITECTURE
+  ═══════════════════════════════════════ */
+  .arch-container {
+    display: flex; gap: 0; width: 100%; align-items: stretch;
+    animation: fadeSlideUp .5s .2s both;
+  }
+  .arch-tier {
+    flex: 1; padding: 28px 20px; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .arch-tier:not(:last-child)::after {
+    content: '▶'; position: absolute; right: -14px; top: 50%;
+    transform: translateY(-50%); font-size: 22px; z-index: 2;
+  }
+  .tier-1 { background: linear-gradient(135deg, rgba(255,45,120,.12), rgba(255,45,120,.04)); border: 1px solid rgba(255,45,120,.3); border-radius: 16px 0 0 16px; }
+  .tier-1::after { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+  .tier-2 { background: linear-gradient(135deg, rgba(0,245,255,.12), rgba(0,245,255,.04)); border: 1px solid rgba(0,245,255,.3); border-top: none; border-bottom: none; }
+  .tier-2::after { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+  .tier-3 { background: linear-gradient(135deg, rgba(57,255,20,.12), rgba(57,255,20,.04)); border: 1px solid rgba(57,255,20,.3); border-radius: 0 16px 16px 0; }
+
+  .tier-label {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 16px; padding: 4px 12px;
+    border-radius: 2px;
+  }
+  .tier-1 .tier-label { color: var(--neon-pink); border: 1px solid rgba(255,45,120,.4); background: rgba(255,45,120,.08); }
+  .tier-2 .tier-label { color: var(--neon-cyan); border: 1px solid rgba(0,245,255,.4); background: rgba(0,245,255,.08); }
+  .tier-3 .tier-label { color: var(--neon-green); border: 1px solid rgba(57,255,20,.4); background: rgba(57,255,20,.08); }
+
+  .arch-tier h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+  .arch-item {
+    width: 100%; padding: 8px 14px; margin-bottom: 6px; border-radius: 6px;
+    font-size: 12px; text-align: center; font-family: 'Share Tech Mono', monospace;
+    letter-spacing: .5px;
+  }
+  .tier-1 .arch-item { background: rgba(255,45,120,.1); color: rgba(255,200,220,1); border: 1px solid rgba(255,45,120,.2); }
+  .tier-2 .arch-item { background: rgba(0,245,255,.08); color: rgba(180,255,255,1); border: 1px solid rgba(0,245,255,.2); }
+  .tier-3 .arch-item { background: rgba(57,255,20,.08); color: rgba(180,255,180,1); border: 1px solid rgba(57,255,20,.2); }
+
+  .connector-label {
+    font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px;
+    text-align: center; margin-top: 8px;
+    color: rgba(255,255,255,.3);
+  }
+
+  /* ═══════════════════════════════════════
+     SLIDE 5 — WORKFLOW
+  ═══════════════════════════════════════ */
+  .workflow-row {
+    display: flex; gap: 0; width: 100%; margin-bottom: 16px; position: relative;
+  }
+  .wf-step {
+    flex: 1; padding: 18px 12px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    position: relative;
+    transform: translateY(30px); opacity: 0;
+    animation: fadeSlideUp .4s both;
+  }
+  .wf-step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+    font-size: 18px; color: rgba(255,255,255,.3); z-index: 2;
+  }
+  .wf-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900;
+    position: relative;
+  }
+  .wf-circle::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%;
+    border: 1.5px solid; opacity: .4;
+    animation: rotateBorder 3s linear infinite;
+  }
+  @keyframes rotateBorder {
+    from { transform: rotate(0deg) } to { transform: rotate(360deg) }
+  }
+  .row1 .wf-step:nth-child(1) .wf-circle { background: rgba(255,45,120,.2); color: var(--neon-pink); border: 2px solid var(--neon-pink); box-shadow: 0 0 20px rgba(255,45,120,.3); }
+  .row1 .wf-step:nth-child(1) .wf-circle::before { border-color: var(--neon-pink); }
+  .row1 .wf-step:nth-child(2) .wf-circle { background: rgba(191,0,255,.2); color: var(--neon-purple); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px rgba(191,0,255,.3); }
+  .row1 .wf-step:nth-child(2) .wf-circle::before { border-color: var(--neon-purple); }
+  .row1 .wf-step:nth-child(3) .wf-circle { background: rgba(0,245,255,.2); color: var(--neon-cyan); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px rgba(0,245,255,.3); }
+  .row1 .wf-step:nth-child(3) .wf-circle::before { border-color: var(--neon-cyan); }
+  .row1 .wf-step:nth-child(4) .wf-circle { background: rgba(255,230,0,.2); color: var(--neon-yellow); border: 2px solid var(--neon-yellow); box-shadow: 0 0 20px rgba(255,230,0,.3); }
+  .row1 .wf-step:nth-child(4) .wf-circle::before { border-color: var(--neon-yellow); }
+  .row2 .wf-step:nth-child(1) .wf-circle { background: rgba(57,255,20,.2); color: var(--neon-green); border: 2px solid var(--neon-green); box-shadow: 0 0 20px rgba(57,255,20,.3); }
+  .row2 .wf-step:nth-child(1) .wf-circle::before { border-color: var(--neon-green); }
+  .row2 .wf-step:nth-child(2) .wf-circle { background: rgba(255,45,120,.2); color: var(--neon-pink); border: 2px solid var(--neon-pink); box-shadow: 0 0 20px rgba(255,45,120,.3); }
+  .row2 .wf-step:nth-child(2) .wf-circle::before { border-color: var(--neon-pink); }
+  .row2 .wf-step:nth-child(3) .wf-circle { background: rgba(0,245,255,.2); color: var(--neon-cyan); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px rgba(0,245,255,.3); }
+  .row2 .wf-step:nth-child(3) .wf-circle::before { border-color: var(--neon-cyan); }
+  .row2 .wf-step:nth-child(4) .wf-circle { background: rgba(191,0,255,.2); color: var(--neon-purple); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px rgba(191,0,255,.3); }
+  .row2 .wf-step:nth-child(4) .wf-circle::before { border-color: var(--neon-purple); }
+
+  .wf-step h4 { font-size: 12px; font-weight: 700; letter-spacing: .5px; }
+  .wf-step p { font-size: 10px; color: rgba(255,255,255,.45); line-height: 1.4; }
+  .wf-divider {
+    display: flex; align-items: center; gap: 12px; margin: 4px 0 10px;
+    font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 3px;
+    color: rgba(255,255,255,.2);
+  }
+  .wf-divider::before, .wf-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+  }
+  .row1 .wf-step:nth-child(1) { animation-delay: .1s }
+  .row1 .wf-step:nth-child(2) { animation-delay: .2s }
+  .row1 .wf-step:nth-child(3) { animation-delay: .3s }
+  .row1 .wf-step:nth-child(4) { animation-delay: .4s }
+  .row2 .wf-step:nth-child(1) { animation-delay: .5s }
+  .row2 .wf-step:nth-child(2) { animation-delay: .6s }
+  .row2 .wf-step:nth-child(3) { animation-delay: .7s }
+  .row2 .wf-step:nth-child(4) { animation-delay: .8s }
+
+  /* ═══════════════════════════════════════
+     SLIDE 6 — ASSEMBLY MODULE
+  ═══════════════════════════════════════ */
+  .asm-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; width: 100%; }
+  .code-block {
+    background: rgba(0,0,0,.6); border: 1px solid rgba(0,245,255,.2);
+    border-radius: 12px; padding: 20px; font-family: 'Share Tech Mono', monospace;
+    font-size: 11.5px; line-height: 1.9; color: rgba(255,255,255,.7);
+    animation: fadeSlideUp .5s .2s both;
+    position: relative; overflow: hidden;
+  }
+  .code-block::before {
+    content: '● ● ●'; position: absolute; top: 10px; left: 16px;
+    font-size: 10px; letter-spacing: 4px; color: rgba(255,255,255,.2);
+  }
+  .code-block pre { margin-top: 18px; }
+  .cm { color: rgba(255,255,255,.25) }
+  .ck { color: var(--neon-pink) }
+  .cs { color: var(--neon-yellow) }
+  .cv { color: var(--neon-cyan) }
+  .cr { color: var(--neon-green) }
+
+  .int-table { width: 100%; animation: fadeSlideUp .5s .35s both; }
+  .int-table h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--neon-cyan); letter-spacing: 1px; }
+  .int-row {
+    display: grid; grid-template-columns: 90px 110px 1fr;
+    gap: 0; margin-bottom: 6px; border-radius: 6px; overflow: hidden;
+    transform: translateX(20px); opacity: 0;
+    animation: slideInRight .4s both;
+  }
+  .int-row:nth-child(2) { animation-delay:.3s } .int-row:nth-child(3) { animation-delay:.4s }
+  .int-row:nth-child(4) { animation-delay:.5s } .int-row:nth-child(5) { animation-delay:.6s }
+  .int-row:nth-child(6) { animation-delay:.7s }
+  .int-fn { background: rgba(255,45,120,.15); color: var(--neon-pink); padding: 9px 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: 700; }
+  .int-op { background: rgba(0,245,255,.1); color: var(--neon-cyan); padding: 9px 10px; font-size: 12px; font-weight: 600; }
+  .int-desc { background: rgba(255,255,255,.04); color: rgba(255,255,255,.55); padding: 9px 12px; font-size: 11px; }
+
+  .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; animation: fadeSlideUp .5s .8s both; }
+  .cat-pill {
+    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; border: 1.5px solid;
+  }
+
+  /* ═══════════════════════════════════════
+     SLIDE 7 — DASHBOARD
+  ═══════════════════════════════════════ */
+  .dash-layout { display: grid; grid-template-columns: repeat(4,1fr) ; gap: 14px; width: 100%; margin-bottom: 18px; }
+  .kpi-card {
+    background: var(--glass); border-radius: 12px; padding: 20px 16px; text-align: center;
+    border: 1px solid rgba(255,255,255,.07); backdrop-filter: blur(10px);
+    transform: translateY(-30px); opacity: 0; animation: fadeSlideDown .5s both;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card:nth-child(1)::after { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+  .kpi-card:nth-child(2)::after { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+  .kpi-card:nth-child(3)::after { background: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
+  .kpi-card:nth-child(4)::after { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+  .kpi-card:nth-child(1) { animation-delay:.1s } .kpi-card:nth-child(2) { animation-delay:.2s }
+  .kpi-card:nth-child(3) { animation-delay:.3s } .kpi-card:nth-child(4) { animation-delay:.4s }
+  .kpi-num {
+    font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900;
+    line-height: 1; margin-bottom: 6px;
+  }
+  .kpi-card:nth-child(1) .kpi-num { color: var(--neon-pink); text-shadow: 0 0 20px rgba(255,45,120,.5); }
+  .kpi-card:nth-child(2) .kpi-num { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0,245,255,.5); }
+  .kpi-card:nth-child(3) .kpi-num { color: var(--neon-yellow); text-shadow: 0 0 20px rgba(255,230,0,.5); }
+  .kpi-card:nth-child(4) .kpi-num { font-size: 18px; color: var(--neon-green); text-shadow: 0 0 20px rgba(57,255,20,.5); margin-top: 10px; }
+  .kpi-label { font-size: 11px; color: rgba(255,255,255,.4); letter-spacing: 2px; text-transform: uppercase; font-family: 'Share Tech Mono', monospace; }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 18px; width: 100%; }
+  .chart-box {
+    background: var(--glass); border-radius: 12px; padding: 20px;
+    border: 1px solid rgba(255,255,255,.07); backdrop-filter: blur(10px);
+    animation: fadeSlideUp .5s .5s both;
+  }
+  .chart-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 16px; letter-spacing: 1px; color: rgba(255,255,255,.7); }
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-legend { font-size: 11px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: rgba(255,255,255,.6); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 120px; }
+  .bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+  .bar {
+    width: 100%; border-radius: 4px 4px 0 0;
+    transform-origin: bottom; transform: scaleY(0);
+    animation: growBar .6s both;
+  }
+  .bar-wrap:nth-child(1) .bar { animation-delay:.6s }
+  .bar-wrap:nth-child(2) .bar { animation-delay:.7s }
+  .bar-wrap:nth-child(3) .bar { animation-delay:.8s }
+  .bar-wrap:nth-child(4) .bar { animation-delay:.9s }
+  .bar-wrap:nth-child(5) .bar { animation-delay:1s }
+  @keyframes growBar { to { transform: scaleY(1) } }
+  .bar-label { font-size: 9px; color: rgba(255,255,255,.4); text-align: center; letter-spacing: .5px; }
+  .bar-val { font-size: 12px; font-weight: 700; font-family: 'Orbitron', sans-serif; }
+
+  /* ═══════════════════════════════════════
+     SLIDE 8 — CONCLUSION
+  ═══════════════════════════════════════ */
+  .concl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 20px; }
+  .concl-card {
+    background: var(--glass); border-radius: 12px; padding: 24px;
+    border: 1px solid rgba(255,255,255,.07); backdrop-filter: blur(10px);
+    animation: fadeSlideUp .5s both;
+  }
+  .concl-card:nth-child(1) { animation-delay:.15s; border-top: 2px solid var(--neon-cyan); }
+  .concl-card:nth-child(2) { animation-delay:.3s; border-top: 2px solid var(--neon-yellow); }
+  .concl-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; letter-spacing: 1px; }
+  .concl-card:nth-child(1) h3 { color: var(--neon-cyan); }
+  .concl-card:nth-child(2) h3 { color: var(--neon-yellow); }
+  .check-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; font-size: 13px; color: rgba(255,255,255,.7); line-height: 1.4; }
+  .check-item::before { content: '✦'; flex-shrink: 0; margin-top: 1px; }
+  .concl-card:nth-child(1) .check-item::before { color: var(--neon-cyan); }
+  .concl-card:nth-child(2) .check-item::before { color: var(--neon-yellow); }
+
+  .thankyou-banner {
+    width: 100%; padding: 22px; text-align: center; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,45,120,.15), rgba(191,0,255,.15), rgba(0,245,255,.15));
+    border: 1px solid rgba(255,255,255,.1);
+    animation: fadeSlideUp .5s .5s both;
+    position: relative; overflow: hidden;
+  }
+  .thankyou-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.03), transparent);
+    animation: shimmer 2.5s linear infinite;
+  }
+  @keyframes shimmer { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+  .thankyou-banner h2 {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(20px, 3vw, 32px);
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-yellow));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    letter-spacing: 2px;
+  }
+  .thankyou-banner p { font-size: 13px; color: rgba(255,255,255,.4); margin-top: 6px; letter-spacing: 3px; font-family: 'Share Tech Mono', monospace; }
+
+  /* ── Shared keyframes ── */
+  @keyframes fadeSlideUp   { from { opacity:0; transform:translateY(30px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes fadeSlideDown { from { opacity:0; transform:translateY(-30px)} to { opacity:1; transform:translateY(0) } }
+  @keyframes slideInLeft   { from { opacity:0; transform:translateX(-40px)} to { opacity:1; transform:translateX(0) } }
+  @keyframes slideInRight  { from { opacity:0; transform:translateX(40px) } to { opacity:1; transform:translateX(0) } }
+
+  /* ── Transition overlay ── */
+  #transition-overlay {
+    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    background: var(--deep-bg); opacity: 0;
+    transition: opacity .22s;
+  }
+  #transition-overlay.flash { opacity: 1; }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas" width="1536" height="730"></canvas>
+<div class="grid-overlay"></div>
+<div id="cursor" style="left: 929px; top: 211px; width: 18px; height: 18px;"></div>
+<div id="cursor-ring" style="left: 929px; top: 211px;"></div>
+<div id="transition-overlay" class=""></div>
+<div id="key-hint">← → KEYS OR CLICK ARROWS</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDES
+════════════════════════════════════════════ -->
+<div id="slides">
+
+  <!-- SLIDE 1 — TITLE -->
+  <div class="slide active" id="slide-0">
+    <div class="s1-eyebrow">COAL — BS Computer Science — Semester Project</div>
+    <h1 class="s1-title">
+      <span class="line1">Quiz Management</span>
+      <span class="line2">System</span>
+    </h1>
+    <p class="s1-sub">Assembly Language × Web-Based Analytics Dashboard</p>
+    <div class="s1-tags">
+      <span class="tag tag-pink">8086 Assembly</span>
+      <span class="tag tag-yellow">TASM</span>
+      <span class="tag tag-cyan">DOSBox</span>
+      <span class="tag tag-green">HTML5</span>
+      <span class="tag tag-purple">JavaScript</span>
+      <span class="tag tag-cyan">Chart.js</span>
+    </div>
+    <div class="s1-team">Aiman Munawar | Aimen Khan</div>
+  <div class="s1-team">Course Instructor: Ms. Sana Maqsood</div></div>
+
+  <!-- SLIDE 2 — PROBLEM STATEMENT -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <div class="slide-num">02 / 08</div>
+      <h2>Problem Statement</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="prob-card">
+        <span class="prob-icon">🧩</span>
+        <h3>Isolation of Assembly Learning</h3>
+        <p>Students study 8086 Assembly Language in isolation without seeing how it connects to real-world applications and modern tech stacks.</p>
+      </div>
+      <div class="prob-card">
+        <span class="prob-icon">📊</span>
+        <h3>No Performance Analytics</h3>
+        <p>Educators lack tools to visualize quiz performance across categories. Existing systems don't expose underlying data mechanisms.</p>
+      </div>
+      <div class="prob-card">
+        <span class="prob-icon">💾</span>
+        <h3>File I/O Without Libraries</h3>
+        <p>Demonstrating persistent data storage using raw DOS INT 21h interrupts—without any C runtime or external library—remains unexplored.</p>
+      </div>
+      <div class="prob-card">
+        <span class="prob-icon">🔗</span>
+        <h3>Interoperability Gap</h3>
+        <p>A clear gap exists between classical system-level programming and contemporary web development paradigms in academic projects.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 — OBJECTIVES -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <div class="slide-num">03 / 08</div>
+      <h2>Project Objectives</h2>
+    </div>
+    <div class="obj-grid">
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-pink)">01</div>
+        <h3>Quiz Engine</h3>
+        <p>Build a fully functional quiz in 8086 Assembly with 5 category support and real-time score computation via registers.</p>
+      </div>
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-cyan)">02</div>
+        <h3>File Handling</h3>
+        <p>Implement persistent record storage using DOS INT 21h file interrupts — zero external libraries.</p>
+      </div>
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-yellow)">03</div>
+        <h3>Web Interface</h3>
+        <p>Develop a 5-page responsive web application for navigation, file upload, and record viewing.</p>
+      </div>
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-green)">04</div>
+        <h3>Analytics Dashboard</h3>
+        <p>Generate pie charts, bar charts, and KPI statistics dynamically from uploaded RECORD.TXT data.</p>
+      </div>
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-purple)">05</div>
+        <h3>Integration</h3>
+        <p>Demonstrate clean interoperability between legacy Assembly programs and modern JavaScript applications.</p>
+      </div>
+      <div class="obj-card">
+        <div class="obj-num" style="color:var(--neon-pink)">06</div>
+        <h3>Documentation</h3>
+        <p>Produce complete academic technical documentation suitable for semester project evaluation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 — ARCHITECTURE -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <div class="slide-num">04 / 08</div>
+      <h2>System Architecture</h2>
+    </div>
+    <div class="arch-container">
+      <div class="arch-tier tier-1">
+        <div class="tier-label">TIER 1</div>
+        <h3 style="color:var(--neon-pink)">Assembly Engine</h3>
+        <div class="arch-item">Keyboard Input (INT 21h)</div>
+        <div class="arch-item">Category Selection</div>
+        <div class="arch-item">Question Delivery</div>
+        <div class="arch-item">Score Computation</div>
+        <div class="arch-item">File Write (AH=40h)</div>
+        <div class="arch-item">RECORD.TXT Output</div>
+        <div class="connector-label" style="margin-top:12px;color:var(--neon-pink)">COAL.EXE / DOSBox</div>
+      </div>
+      <div class="arch-tier tier-2">
+        <div class="tier-label">TIER 2</div>
+        <h3 style="color:var(--neon-cyan)">Web Layer</h3>
+        <div class="arch-item">File Upload UI</div>
+        <div class="arch-item">FileReader API</div>
+        <div class="arch-item">Record Parser (JS)</div>
+        <div class="arch-item">Statistical Engine</div>
+        <div class="arch-item">Chart.js Render</div>
+        <div class="arch-item">KPI Cards</div>
+        <div class="connector-label" style="margin-top:12px;color:var(--neon-cyan)">HTML5 / CSS3 / JS</div>
+      </div>
+      <div class="arch-tier tier-3">
+        <div class="tier-label">TIER 3</div>
+        <h3 style="color:var(--neon-green)">Analytics Output</h3>
+        <div class="arch-item">Total Players</div>
+        <div class="arch-item">Highest Score</div>
+        <div class="arch-item">Average Score</div>
+        <div class="arch-item">Score Pie Chart</div>
+        <div class="arch-item">Category Bar Chart</div>
+        <div class="arch-item">Activity Log</div>
+        <div class="connector-label" style="margin-top:12px;color:var(--neon-green)">Dashboard Analytics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 — WORKFLOW -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <div class="slide-num">05 / 08</div>
+      <h2>Project Workflow</h2>
+    </div>
+    <div class="workflow-row row1">
+      <div class="wf-step">
+        <div class="wf-circle">1</div>
+        <h4>Open Web UI</h4>
+        <p>Launch index.html in any modern browser</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">2</div>
+        <h4>Run COAL.EXE</h4>
+        <p>Execute assembly engine in DOSBox emulator</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">3</div>
+        <h4>Enter Username</h4>
+        <p>Buffered input via INT 21h / AH=0Ah</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">4</div>
+        <h4>Select Category</h4>
+        <p>Menu driven by CMP/JE branching</p>
+      </div>
+    </div>
+    <div class="wf-divider">RECORD.TXT BRIDGE</div>
+    <div class="workflow-row row2">
+      <div class="wf-step">
+        <div class="wf-circle">5</div>
+        <h4>Attempt Quiz</h4>
+        <p>MCQs displayed; answer checked vs register</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">6</div>
+        <h4>Score &amp; Store</h4>
+        <p>ADD/INC score; write to RECORD.TXT</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">7</div>
+        <h4>Upload File</h4>
+        <p>User uploads via web FileReader API</p>
+      </div>
+      <div class="wf-step">
+        <div class="wf-circle">8</div>
+        <h4>View Dashboard</h4>
+        <p>Charts &amp; KPIs rendered by Chart.js</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 — ASSEMBLY MODULE -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <div class="slide-num">06 / 08</div>
+      <h2>Assembly Module &amp; File Handling</h2>
+    </div>
+    <div class="asm-layout">
+      <div class="code-block">
+        <pre><span class="cm">; ── Score Computation ──────────</span>
+<span class="ck">MOV</span>  BL, <span class="cs">0</span>          <span class="cm">; init score</span>
+
+<span class="ck">INT</span>  <span class="cs">21h</span>           <span class="cm">; AH=09h display Q</span>
+<span class="ck">INT</span>  <span class="cs">21h</span>           <span class="cm">; AH=01h read ans</span>
+<span class="ck">CMP</span>  AL, <span class="cv">correct</span>   <span class="cm">; check answer</span>
+<span class="ck">JNE</span>  <span class="cv">next_q</span>        <span class="cm">; wrong → skip</span>
+<span class="ck">INC</span>  BL            <span class="cm">; correct → +1</span>
+
+<span class="cm">; ── File Write (Append) ────────</span>
+<span class="ck">MOV</span>  AH, <span class="cs">3Ch</span>       <span class="cm">; Create file</span>
+<span class="ck">LEA</span>  DX, filename
+<span class="ck">INT</span>  <span class="cs">21h</span>
+<span class="ck">MOV</span>  BX, AX        <span class="cm">; file handle</span>
+<span class="ck">MOV</span>  AH, <span class="cs">40h</span>       <span class="cm">; Write data</span>
+<span class="ck">LEA</span>  DX, record
+<span class="ck">INT</span>  <span class="cs">21h</span>
+<span class="ck">MOV</span>  AH, <span class="cs">3Eh</span>       <span class="cm">; Close file</span>
+<span class="ck">INT</span>  <span class="cs">21h</span></pre>
+      </div>
+      <div>
+        <div class="int-table">
+          <h3>INT 21h File Operations</h3>
+          <div class="int-row"><div class="int-fn">AH=3Ch</div><div class="int-op">Create File</div><div class="int-desc">Creates RECORD.TXT; CX=0 normal attr</div></div>
+          <div class="int-row"><div class="int-fn">AH=3Dh</div><div class="int-op">Open File</div><div class="int-desc">Opens read-write; AL=02h</div></div>
+          <div class="int-row"><div class="int-fn">AH=42h</div><div class="int-op">Seek End</div><div class="int-desc">Moves pointer for append; AL=02h</div></div>
+          <div class="int-row"><div class="int-fn">AH=40h</div><div class="int-op">Write File</div><div class="int-desc">Writes CX bytes from DS:DX buffer</div></div>
+          <div class="int-row"><div class="int-fn">AH=3Eh</div><div class="int-op">Close File</div><div class="int-desc">Closes handle BX, flushes writes</div></div>
+        </div>
+        <div class="cat-pills">
+          <span class="cat-pill" style="border-color:var(--neon-pink);color:var(--neon-pink)">General Knowledge</span>
+          <span class="cat-pill" style="border-color:var(--neon-cyan);color:var(--neon-cyan)">Science</span>
+          <span class="cat-pill" style="border-color:var(--neon-yellow);color:var(--neon-yellow)">History</span>
+          <span class="cat-pill" style="border-color:var(--neon-green);color:var(--neon-green)">Sports</span>
+          <span class="cat-pill" style="border-color:var(--neon-purple);color:var(--neon-purple)">Movies</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 — DASHBOARD -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <div class="slide-num">07 / 08</div>
+      <h2>Dashboard Analytics &amp; Testing Results</h2>
+    </div>
+    <div class="dash-layout">
+      <div class="kpi-card">
+        <div class="kpi-num" id="kpi-players">4</div>
+        <div class="kpi-label">Total Players</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num" id="kpi-high">2</div>
+        <div class="kpi-label">Highest Score</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num" id="kpi-avg">175</div>
+        <div class="kpi-label">Average Score</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">Gen. Knowledge</div>
+        <div class="kpi-label">Popular Category</div>
+      </div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-box">
+        <h4>Score Distribution</h4>
+        <div class="donut-wrap">
+          <canvas id="donutChart" width="120" height="120"></canvas>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neon-pink)"></div>Needs Improvement</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neon-yellow)"></div>Average (40-59)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neon-cyan)"></div>Good (60-79)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neon-green)"></div>Excellent (80-100)</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h4>Category Performance — Average Score</h4>
+        <div class="bar-chart" id="barChart">
+          <div class="bar-wrap">
+            <div class="bar-val" style="color:var(--neon-cyan)">2</div>
+            <div class="bar" style="height:80px;background:linear-gradient(to top,var(--neon-cyan),rgba(0,245,255,.3))"></div>
+            <div class="bar-label">General<br>Knowledge</div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-val" style="color:var(--neon-pink)">2</div>
+            <div class="bar" style="height:80px;background:linear-gradient(to top,var(--neon-pink),rgba(255,45,120,.3))"></div>
+            <div class="bar-label">Science</div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-val" style="color:rgba(255,255,255,.3)">0</div>
+            <div class="bar" style="height:4px;background:rgba(255,255,255,.1)"></div>
+            <div class="bar-label">History</div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-val" style="color:var(--neon-yellow)">1</div>
+            <div class="bar" style="height:40px;background:linear-gradient(to top,var(--neon-yellow),rgba(255,230,0,.3))"></div>
+            <div class="bar-label">Sports</div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-val" style="color:rgba(255,255,255,.3)">0</div>
+            <div class="bar" style="height:4px;background:rgba(255,255,255,.1)"></div>
+            <div class="bar-label">Movies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 — CONCLUSION -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <div class="slide-num">08 / 08</div>
+      <h2>Conclusion &amp; Future Scope</h2>
+    </div>
+    <div class="concl-grid">
+      <div class="concl-card">
+        <h3>✦ Key Achievements</h3>
+        <div class="check-item">Fully functional quiz engine in pure 8086 Assembly Language</div>
+        <div class="check-item">DOS INT 21h file I/O with zero external runtime dependencies</div>
+        <div class="check-item">5-page web interface with bold dark neon theme</div>
+        <div class="check-item">Real-time analytics with Chart.js pie &amp; bar charts</div>
+        <div class="check-item">Clean data bridge via pipe-delimited RECORD.TXT format</div>
+      </div>
+      <div class="concl-card">
+        <h3>✦ Future Enhancements</h3>
+        <div class="check-item">External question bank loaded at runtime from a file</div>
+        <div class="check-item">Countdown timer using BIOS INT 1Ah interrupts</div>
+        <div class="check-item">Node.js file watcher for real-time dashboard sync</div>
+        <div class="check-item">PDF / CSV export from the analytics dashboard</div>
+        <div class="check-item">Leaderboard with ranked scores per category</div>
+      </div>
+    </div>
+    <div class="thankyou-banner">
+      <h2>Thank You — Questions Welcome!</h2>
+      <p>Aiman Munawar | Aimen Khan</p>
+    <p>BSCS-13-F24-14  | BSCS-13-F24-24</p></div>
+  </div>
+
+</div><!-- /slides -->
+
+<!-- NAV -->
+<div id="nav">
+  <button class="nav-btn" id="prev-btn">←</button>
+  <div id="dots"><button class="nav-dot active"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button></div>
+  <span id="slide-counter">1 / 8</span>
+  <button class="nav-btn" id="next-btn">→</button>
+</div>
+
+<script>
+/* ── Particle background ─────────────────────────────────────── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const COLORS = ['#FF2D78','#00F5FF','#FFE600','#39FF14','#BF00FF'];
+const particles = Array.from({length: 90}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.8 + .4,
+  vx: (Math.random() - .5) * .4,
+  vy: (Math.random() - .5) * .4,
+  color: COLORS[Math.floor(Math.random() * COLORS.length)],
+  alpha: Math.random() * .6 + .2,
+}));
+
+// Shooting stars
+const stars = [];
+function spawnStar() {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * .5,
+    len: Math.random() * 120 + 60,
+    speed: Math.random() * 8 + 6,
+    angle: Math.PI / 4 + (Math.random() - .5) * .3,
+    alpha: 1,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+  });
+}
+setInterval(spawnStar, 2200);
+
+function animateBg() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Nebula glows
+  [[.15,.3,'#FF2D78',.06],[.85,.7,'#00F5FF',.05],[.5,.5,'#BF00FF',.04]].forEach(([fx,fy,c,a]) => {
+    const g = ctx.createRadialGradient(canvas.width*fx, canvas.height*fy, 0, canvas.width*fx, canvas.height*fy, canvas.width*.4);
+    g.addColorStop(0, c.replace(')', `,${a})`).replace('rgb','rgba').replace('#','').length > 10 ? c + Math.round(a*255).toString(16).padStart(2,'0') : c + '0F');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  });
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.shadowBlur = 8; ctx.shadowColor = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+
+  // Lines between nearby particles
+  particles.forEach((a, i) => {
+    particles.slice(i+1).forEach(b => {
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (d < 100) {
+        ctx.save(); ctx.globalAlpha = (1-d/100)*.08;
+        ctx.strokeStyle = '#00F5FF'; ctx.lineWidth = .5;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        ctx.restore();
+      }
+    });
+  });
+
+  // Shooting stars
+  for (let i = stars.length-1; i >= 0; i--) {
+    const s = stars[i];
+    ctx.save(); ctx.globalAlpha = s.alpha;
+    const g2 = ctx.createLinearGradient(s.x, s.y, s.x - Math.cos(s.angle)*s.len, s.y - Math.sin(s.angle)*s.len);
+    g2.addColorStop(0, s.color); g2.addColorStop(1, 'transparent');
+    ctx.strokeStyle = g2; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x - Math.cos(s.angle)*s.len, s.y - Math.sin(s.angle)*s.len);
+    ctx.stroke(); ctx.restore();
+    s.x += Math.cos(s.angle) * s.speed;
+    s.y += Math.sin(s.angle) * s.speed;
+    s.alpha -= .018;
+    if (s.alpha <= 0) stars.splice(i,1);
+  }
+
+  requestAnimationFrame(animateBg);
+}
+animateBg();
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+});
+
+/* ── Custom cursor ───────────────────────────────────────────── */
+const cursorDot = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mx = 0, my = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursorDot.style.left = mx+'px'; cursorDot.style.top = my+'px';
+  cursorRing.style.left = mx+'px'; cursorRing.style.top = my+'px';
+});
+document.querySelectorAll('button,.nav-dot').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursorDot.style.width='28px'; cursorDot.style.height='28px'; });
+  el.addEventListener('mouseleave', () => { cursorDot.style.width='18px'; cursorDot.style.height='18px'; });
+});
+
+/* ── Slide logic ─────────────────────────────────────────────── */
+const slides = document.querySelectorAll('.slide');
+const overlay = document.getElementById('transition-overlay');
+const counter = document.getElementById('slide-counter');
+const dotsContainer = document.getElementById('dots');
+let current = 0;
+let animating = false;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('button');
+  d.className = 'nav-dot' + (i===0?' active':'');
+  d.addEventListener('click', () => goTo(i));
+  dotsContainer.appendChild(d);
+});
+
+function goTo(idx) {
+  if (animating || idx === current) return;
+  animating = true;
+  overlay.classList.add('flash');
+  setTimeout(() => {
+    slides[current].classList.remove('active');
+    current = (idx + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    // Re-trigger animations
+    slides[current].querySelectorAll('[style*="animation"]').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+    document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i===current));
+    counter.textContent = `${current+1} / ${slides.length}`;
+    overlay.classList.remove('flash');
+    if (current === 6) startKpiCounters();
+    animating = false;
+  }, 220);
+}
+
+document.getElementById('prev-btn').addEventListener('click', () => goTo(current-1));
+document.getElementById('next-btn').addEventListener('click', () => goTo(current+1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') goTo(current+1);
+  if (e.key === 'ArrowLeft') goTo(current-1);
+});
+
+/* ── KPI counters ────────────────────────────────────────────── */
+function countUp(el, target, duration=900) {
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts-start)/duration, 1);
+    const ease = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+let kpiDone = false;
+function startKpiCounters() {
+  if (kpiDone) return; kpiDone = true;
+  setTimeout(() => countUp(document.getElementById('kpi-players'), 4), 400);
+  setTimeout(() => countUp(document.getElementById('kpi-high'), 2), 600);
+  setTimeout(() => countUp(document.getElementById('kpi-avg'), 175, 1100), 800);
+  // Draw donut
+  setTimeout(drawDonut, 500);
+}
+function drawDonut() {
+  const c = document.getElementById('donutChart');
+  const x = c.getContext('2d');
+  const cx = 60, cy = 60, r = 46, inner = 28;
+  const data = [{v:4,c:'#FF2D78'},{v:0,c:'#FFE600'},{v:0,c:'#00F5FF'},{v:0,c:'#39FF14'}];
+  const total = data.reduce((s,d)=>s+d.v, 0) || 1;
+  let angle = -Math.PI/2;
+  data.forEach(d => {
+    if (!d.v) return;
+    const sweep = (d.v/total)*Math.PI*2;
+    x.beginPath(); x.moveTo(cx,cy);
+    x.arc(cx,cy,r,angle,angle+sweep);
+    x.closePath(); x.fillStyle = d.c;
+    x.shadowBlur = 12; x.shadowColor = d.c;
+    x.fill(); angle += sweep;
+  });
+  x.beginPath(); x.arc(cx,cy,inner,0,Math.PI*2);
+  x.fillStyle = '#050510'; x.fill();
+  x.fillStyle = '#fff'; x.font = 'bold 13px Orbitron,sans-serif';
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText('100%', cx, cy);
+}
+</script>
+
+
+</body></html>
